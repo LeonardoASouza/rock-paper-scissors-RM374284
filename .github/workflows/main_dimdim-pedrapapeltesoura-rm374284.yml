@@ -24,7 +24,7 @@ jobs:
           java-version: '11'
           distribution: 'microsoft'
 
-      # Compila o projeto e gera o .war ignorando os testes unitários para não travar
+      # Compila o projeto e gera o arquivo .war ignorando os testes que estavam quebrando o processo
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
@@ -46,12 +46,17 @@ jobs:
         with:
           name: java-app
       
-      # Deploy direto utilizando o token do perfil de publicação (Publish Profile XML)
+      # Autenticação utilizando o JSON de credenciais que geramos no Cloud Shell
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy do arquivo .war para o ambiente do Tomcat na Azure
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'dimdim-pedrapapeltesoura-rm374284'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: '*.war'
